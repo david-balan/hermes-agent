@@ -665,6 +665,9 @@ export function ChatBar({
     scheduleFlushEditorToDraft(event.currentTarget)
   }
 
+  // Mirrors the live dictation toggle/status (declared further down) so Enter can stop a running dictation.
+  const dictationRef = useRef<{ dictate: () => void; status: string }>({ dictate: () => {}, status: 'idle' })
+
   const handleEditorKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     // Self-heal a stale composition flag before the guard below reads it.
     // compositionend can be missed (focus jumps, input-source switches, or a
@@ -988,6 +991,14 @@ export function ChatBar({
       return
     }
 
+    // Enter while dictating stops the recording (transcript lands in the draft) instead of sending.
+    if (event.key === 'Enter' && dictationRef.current.status === 'recording') {
+      event.preventDefault()
+      dictationRef.current.dictate()
+
+      return
+    }
+
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
 
@@ -1111,6 +1122,7 @@ export function ChatBar({
   // live conversation state. Render-time ref assignment, same pattern as
   // dispatchSubmitRef — no effect needed for a plain mirror.
   voiceStopRef.current = { active: voiceConversationActive, end: endConversation }
+  dictationRef.current = { dictate, status: voiceStatus }
 
   const contextMenu = (
     <ContextMenu

@@ -166,7 +166,8 @@ function PlaybackWaveform({ audioElement }: { audioElement: HTMLAudioElement | n
 export function VoiceActivity({ state }: { state: VoiceActivityState }) {
   const { t } = useI18n()
 
-  if (state.status === 'idle') {
+  // Dictation pill (live text, timer, level bars) intentionally hidden — the mic button shows state.
+  if (state.status === 'idle' || true) {
     return null
   }
 
